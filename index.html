@@ -48,6 +48,18 @@
 
   .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:12px 20px; border-radius:999px; font-size:14px; opacity:0; transition:opacity .3s; pointer-events:none; max-width:90%; }
   .toast.show { opacity:1; }
+
+  .btn.ghost { background:transparent; color:var(--ink); border:2px solid var(--ink); }
+  .mail { background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,.12); margin-bottom:8px; }
+  .mail-head { background:var(--blue); color:#fff; padding:20px 24px; }
+  .mail-head .brand { font-size:13px; opacity:.85; letter-spacing:1px; }
+  .mail-head h3 { margin:6px 0 0; font-size:20px; }
+  .mail-body { padding:22px 24px; line-height:1.9; }
+  .mail-body p { margin:8px 0; }
+  .mail-body .quote { background:var(--cream); border-left:5px solid var(--yellow); padding:14px 16px; border-radius:8px; margin:14px 0; white-space:pre-wrap; }
+  .mail-body .small { font-size:14px; color:#555; }
+  .mail-foot { background:var(--cream); padding:14px 24px; font-size:13px; color:#555; text-align:center; }
+  .btn-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px; }
 </style>
 </head>
 <body>
@@ -129,7 +141,34 @@
       <div class="counter"><span id="count">0</span> / 500 字</div>
       <div class="err" id="reviewErr"></div>
       <div class="actions">
-        <button class="btn" id="sendBtn" onclick="sendFeedback()" disabled>送出回饋</button>
+        <button class="btn" id="previewBtn" onclick="showPreview()" disabled>預覽回饋信件</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 回饋信件預覽 -->
+  <section id="preview" class="screen">
+    <div class="card">
+      <h2>回饋信件預覽</h2>
+      <p class="sub">這是作者會收到的信件內容，確認無誤後再送出。</p>
+      <div class="mail">
+        <div class="mail-head">
+          <div class="brand">LEAD FOR TAIWAN · 感恩節筆友</div>
+          <h3>你收到了一則來自筆友的回饋 🍂</h3>
+        </div>
+        <div class="mail-body">
+          <p>嗨！</p>
+          <p>有一位筆友讀了你的心情，想回饋給你：</p>
+          <div class="quote" id="pvQuote"></div>
+          <p>— 來自 <strong id="pvName"></strong> 的回饋</p>
+          <p class="small">你最近的煩惱：<span id="pvWorry"></span><br>你最近的開心：<span id="pvHappy"></span></p>
+        </div>
+        <div class="mail-foot">Lead For Taiwan · 感恩節筆友網站<br>感謝你的參與 🍁</div>
+      </div>
+      <div class="err" id="previewErr"></div>
+      <div class="btn-row">
+        <button class="btn ghost" onclick="go('review')">返回修改</button>
+        <button class="btn" id="confirmBtn" onclick="sendFeedback()">確認送出回饋</button>
       </div>
     </div>
   </section>
@@ -140,9 +179,6 @@
       <span style="font-size:48px">🦃</span>
       <h2>謝謝你的回饋！</h2>
       <p>感謝你的回饋，回饋會以 Email 寄給作者、當你的事件被回饋後也會收到一封回饋信件喔！</p>
-      <div class="actions">
-        <button class="btn" onclick="checkAssignment()">再回饋一位筆友</button>
-      </div>
     </div>
   </section>
 
@@ -152,10 +188,11 @@
 
 <script>
   // 部署 Apps Script 後，把網址貼在這裡
-  const API_URL = 'https://script.google.com/macros/s/AKfycby29WlXrQIRoUR3kDc768cFekoD6POrRQBQAmWNArR0yqQ1-kk0uHN53tIFhPjZRDE/exec';
+  const API_URL = 'https://script.google.com/macros/library/d/1OKIBx2cnJ0nBcOCsvy7Dx7iyn6nc3bfuRsShrirkVbJSCRhSC1UK0hEN/1';
 
   let myId = localStorage.getItem('lft_my_id') || '';
   let target = null;
+  let pendingFeedback = '';
 
   function go(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
@@ -204,6 +241,7 @@
       if (!r.ok) { err.textContent = r.error; return; }
       myId = r.id;
       localStorage.setItem('lft_my_id', myId);
+      localStorage.setItem('lft_my_name', data.name);
       if (r.assignment) showReview(r.assignment);
       else go('waiting');
     } catch (e) {
@@ -238,27 +276,40 @@
   function updateCount() {
     const len = document.getElementById('feedback').value.length;
     document.getElementById('count').textContent = len;
-    document.getElementById('sendBtn').disabled = len < 10;
+    document.getElementById('previewBtn').disabled = len < 10;
   }
 
-  async function sendFeedback() {
-    const btn = document.getElementById('sendBtn');
-    const err = document.getElementById('reviewErr');
+  // 先顯示回饋信件預覽，確認後才送出
+  function showPreview() {
     const text = val('feedback');
+    const err = document.getElementById('reviewErr');
     if (text.length < 10) {
       err.textContent = '再多寫一點溫暖的話吧（至少 10 字）。';
       return;
     }
+    err.textContent = '';
+    pendingFeedback = text;
+    document.getElementById('pvQuote').textContent = text;
+    document.getElementById('pvName').textContent = localStorage.getItem('lft_my_name') || '筆友';
+    document.getElementById('pvWorry').textContent = target.worry;
+    document.getElementById('pvHappy').textContent = target.happy;
+    document.getElementById('previewErr').textContent = '';
+    go('preview');
+  }
+
+  async function sendFeedback() {
+    const btn = document.getElementById('confirmBtn');
+    const err = document.getElementById('previewErr');
     btn.disabled = true;
     err.textContent = '';
     try {
-      const r = await api('feedback', { id: myId, targetId: target.id, text });
+      const r = await api('feedback', { id: myId, targetId: target.id, text: pendingFeedback });
       if (!r.ok) { err.textContent = r.error; return; }
       go('done');
     } catch (e) {
       err.textContent = '網路好像有點問題，請稍後再試。';
     } finally {
-      updateCount();
+      btn.disabled = false;
     }
   }
 </script>
