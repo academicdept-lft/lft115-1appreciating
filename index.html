@@ -65,7 +65,7 @@
 <body>
 
 <header>
-  <img class="logo" src="logo.webp" alt="Lead For Taiwan">
+  <img class="logo" src="logo.webp.webp" alt="Lead For Taiwan">
 </header>
 
 <main>
@@ -87,8 +87,8 @@
     <div class="card">
       <h2>留下你的心情</h2>
       <p class="sub">你的 Email 只用於寄送回饋信件。</p>
-      <label for="name">名字</label>
-      <input id="name" maxlength="20" placeholder="例如：小寶">
+      <label for="name">名字或暱稱</label>
+      <input id="name" maxlength="20" placeholder="例如：13、ㄆㄖ">
       <label for="email">Email</label>
       <input id="email" type="email" placeholder="you@example.com">
       <label for="worry">最近煩惱的事</label>
@@ -112,6 +112,24 @@
       <div class="actions">
         <button class="btn" onclick="checkAssignment()">重新查看</button>
       </div>
+    </div>
+  </section>
+
+  <!-- 前三人：暫時不能回饋 -->
+  <section id="locked" class="screen">
+    <div class="card wait">
+      <span style="font-size:48px">🍁</span>
+      <h2>謝謝你的分享！</h2>
+      <p>你是最早加入的筆友之一，等其他筆友回饋你之後，<br>我們會寄一封回饋信給你，信裡會附上專屬連結，<br>邀請你回來回饋另一位筆友喔！</p>
+    </div>
+  </section>
+
+  <!-- 已經回饋過 -->
+  <section id="already" class="screen">
+    <div class="card done">
+      <span style="font-size:48px">🦃</span>
+      <h2>你已經完成回饋囉！</h2>
+      <p>謝謝你的溫暖，當你的事件被回饋後也會收到一封回饋信件喔！</p>
     </div>
   </section>
 
@@ -182,7 +200,8 @@
   // 部署 Apps Script 後，把網址貼在這裡
   const API_URL = 'https://script.google.com/macros/s/AKfycby29WlXrQIRoUR3kDc768cFekoD6POrRQBQAmWNArR0yqQ1-kk0uHN53tIFhPjZRDE/exec';
 
-  let myId = localStorage.getItem('lft_my_id') || '';
+  let myId = '';
+  try { myId = localStorage.getItem('lft_my_id') || ''; } catch (e) {}
   let target = null;
   let pendingFeedback = '';
 
@@ -231,11 +250,7 @@
     try {
       const r = await api('submit', data);
       if (!r.ok) { err.textContent = r.error; return; }
-      myId = r.id;
-      localStorage.setItem('lft_my_id', myId);
-      localStorage.setItem('lft_my_name', data.name);
-      if (r.assignment) showReview(r.assignment);
-      else go('waiting');
+      handleStatus(r);
     } catch (e) {
       err.textContent = '網路好像有點問題，請稍後再試。';
     } finally {
@@ -247,13 +262,35 @@
     if (!myId) { go('form'); return; }
     try {
       const r = await api('assign', { id: myId });
-      if (!r.ok) { toast(r.error); return; }
-      if (r.assignment) showReview(r.assignment);
-      else go('waiting');
+      if (!r.ok) { toast(r.error); go('form'); return; }
+      handleStatus(r);
     } catch (e) {
       toast('網路好像有點問題，請稍後再試。');
     }
   }
+
+  // 依後端回傳的狀態切換畫面
+  function handleStatus(r) {
+    myId = r.id;
+    try {
+      localStorage.setItem('lft_my_id', r.id);
+      localStorage.setItem('lft_my_name', r.me);
+    } catch (e) {}
+    if (r.status === 'locked') go('locked');
+    else if (r.status === 'done') go('already');
+    else if (r.status === 'review') showReview(r.assignment);
+    else go('waiting');
+  }
+
+  // 從信件中的專屬連結（?id=...）回來時，直接帶回自己的紀錄
+  (function initFromLink() {
+    const linkId = new URLSearchParams(location.search).get('id');
+    if (linkId) {
+      myId = linkId;
+      history.replaceState(null, '', location.pathname);
+      checkAssignment();
+    }
+  })();
 
   function showReview(a) {
     target = a;
