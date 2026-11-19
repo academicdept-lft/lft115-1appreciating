@@ -77,8 +77,8 @@
       <span class="deco d2">🎃</span>
       <span class="deco d3">🌾</span>
       <h1>感恩節，<br>來說說最近的心情吧</h1>
-      <p>雖然沒有辦法實體和大家靠北與聊天，<br>但藉著感恩節，在線上寫下一件最近煩惱的事、一件最近開心的事，<br>再用溫暖的文字回饋給另一位 LFT 筆友吧！</p>
-      <button class="btn" onclick="startOrResume()">開始感恩節回顧！</button>
+      <p>雖然沒有辦法實體和大家靠北與聊天，<br>但藉著感恩節，<br>和大家在線上互相交流回饋吧！</p>
+      <button class="btn" onclick="startOrResume()">開始感恩節筆友活動！</button>
     </div>
   </section>
 
@@ -86,18 +86,18 @@
   <section id="form" class="screen">
     <div class="card">
       <h2>嗨，最近好嗎？</h2>
-      <p class="sub">您的 Email 只用於寄送回饋信件。</p>
+      <p class="sub">您的 Email 只用於寄送您的筆友給您的回饋信件。</p>
       <label for="name">名字或暱稱</label>
       <input id="name" maxlength="20" placeholder="例如：ㄆㄖ、13">
       <label for="email">Email</label>
       <input id="email" type="email" placeholder="you@example.com">
       <label for="worry">最近煩惱的事</label>
-      <textarea id="worry" maxlength="300" placeholder="最近讓你有點累或擔心的事……"></textarea>
+      <textarea id="worry" maxlength="300" placeholder="最近讓您有點累或擔心的事……"></textarea>
       <label for="happy">最近開心的事</label>
-      <textarea id="happy" maxlength="300" placeholder="最近讓你會心一笑、感到愉悅的事……"></textarea>
+      <textarea id="happy" maxlength="300" placeholder="最近讓您會心一笑、感到愉悅的事……"></textarea>
       <div class="err" id="formErr"></div>
       <div class="actions">
-        <button class="btn" id="submitBtn" onclick="submitForm()">送出，去找一位筆友</button>
+        <button class="btn" id="submitBtn" onclick="submitForm()">送出，去回饋一位筆友的事件</button>
       </div>
     </div>
     <div style="text-align:center"><button class="nav-link" onclick="go('home')">返回首頁</button></div>
@@ -113,34 +113,34 @@
         <button class="btn" onclick="checkAssignment()">重新查看</button>
       </div>
     </div>
-    <div style="text-align:center"><button class="nav-link" onclick="startOver()">不是你？以新的筆友身分填寫</button></div>
+    <div style="text-align:center"><button class="nav-link" onclick="startOver()">不是您？以新的筆友身分填寫</button></div>
   </section>
 
   <!-- 前三人：暫時不能回饋 -->
   <section id="locked" class="screen">
     <div class="card wait">
       <span style="font-size:48px">🍁</span>
-      <h2>謝謝你的分享！</h2>
-      <p>你是最早加入的筆友之一，等其他筆友回饋你之後，<br>我們會寄一封回饋信給你，信裡會附上專屬連結，<br>邀請你回來回饋另一位筆友喔！</p>
+      <h2>謝謝您的分享！</h2>
+      <p>您是最早加入的筆友之一，等其他筆友回饋您之後，<br>我們會寄一封回饋信給您，信裡會附上專屬連結，<br>邀請您回來回饋另一位筆友喔！</p>
     </div>
-    <div style="text-align:center"><button class="nav-link" onclick="startOver()">不是你？以新的筆友身分填寫</button></div>
+    <div style="text-align:center"><button class="nav-link" onclick="startOver()">不是您？以新的筆友身分填寫</button></div>
   </section>
 
   <!-- 已經回饋過 -->
   <section id="already" class="screen">
     <div class="card done">
       <span style="font-size:48px">🦃</span>
-      <h2>你已經完成回饋囉！</h2>
-      <p>謝謝你的溫暖，當你的事件被回饋後也會收到一封回饋信件喔！</p>
+      <h2>您已經完成回饋囉！</h2>
+      <p>謝謝您的溫暖，當您的事件被回饋後，也會在您留下的信箱中收到一封回饋信件喔！</p>
     </div>
-    <div style="text-align:center"><button class="nav-link" onclick="startOver()">不是你？以新的筆友身分填寫</button></div>
+    <div style="text-align:center"><button class="nav-link" onclick="startOver()">不是您？以新的筆友身分填寫</button></div>
   </section>
 
   <!-- 回饋頁 -->
   <section id="review" class="screen">
     <div class="card">
       <h2>回饋一位筆友</h2>
-      <p class="sub">請閱讀對方的煩惱與開心事件，試圖用溫暖的文字回饋給對方，對方將會收到你的回饋信件唷！</p>
+      <p class="sub">請閱讀對方的煩惱與開心事件，試圖用溫暖的文字回饋給對方，對方將會收到您的回饋信件唷！</p>
       <div class="item-block">
         <div class="tag">TA 的煩惱</div>
         <p id="pWorry"></p>
@@ -149,8 +149,8 @@
         <div class="tag">TA 的開心</div>
         <p id="pHappy"></p>
       </div>
-      <label for="feedback">你的回饋</label>
-      <textarea id="feedback" maxlength="500" oninput="updateCount()" placeholder="寫下你想對 TA 說的話，例如：謝謝你願意分享，也希望你……"></textarea>
+      <label for="feedback">您的回饋</label>
+      <textarea id="feedback" maxlength="500" oninput="updateCount()" placeholder="寫下您想對 TA 說的話，例如：謝謝您願意分享，也希望您……"></textarea>
       <div class="counter"><span id="count">0</span> / 500 字</div>
       <div class="err" id="reviewErr"></div>
       <div class="actions">
@@ -167,16 +167,16 @@
       <div class="mail">
         <div class="mail-head">
           <div class="brand">LEAD FOR TAIWAN · 感恩節筆友</div>
-          <h3>你收到了一則來自筆友的回饋 🍂</h3>
+          <h3>您收到了一則來自筆友的回饋 🍂</h3>
         </div>
         <div class="mail-body">
           <p>嗨！</p>
-          <p>有一位筆友讀了你的心情，想回饋給你：</p>
+          <p>有一位筆友讀了您的心情，想回饋給您：</p>
           <div class="quote" id="pvQuote"></div>
           <p>— 來自 <strong id="pvName"></strong> 的回饋</p>
-          <p class="small">你最近的煩惱：<span id="pvWorry"></span><br>你最近的開心：<span id="pvHappy"></span></p>
+          <p class="small">您最近的煩惱：<span id="pvWorry"></span><br>您最近的開心：<span id="pvHappy"></span></p>
         </div>
-        <div class="mail-foot">Lead For Taiwan · 感恩節筆友網站<br>感謝你的參與 🍁</div>
+        <div class="mail-foot">Lead For Taiwan · Lead For Taiwan 感恩節筆友活動<br>感謝您的參與 🍁</div>
       </div>
       <div class="err" id="previewErr"></div>
       <div class="btn-row">
@@ -190,8 +190,8 @@
   <section id="done" class="screen">
     <div class="card done">
       <span style="font-size:48px">🦃</span>
-      <h2>謝謝你的回饋！</h2>
-      <p>感謝你的回饋，回饋會以 Email 寄給作者、當你的事件被回饋後也會收到一封回饋信件喔！</p>
+      <h2>謝謝您的回饋！</h2>
+      <p>感謝您的回饋，回饋會以 Email 寄給作者、當您的事件被回饋後也會收到一封回饋信件喔！</p>
     </div>
   </section>
 
