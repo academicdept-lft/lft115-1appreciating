@@ -65,7 +65,7 @@
 <body>
 
 <header>
-  <img class="logo" src="logo.webp" alt="Lead For Taiwan">
+  <img class="logo" src="logo.webp.webp" alt="Lead For Taiwan">
 </header>
 
 <main>
@@ -332,7 +332,7 @@
     btn.disabled = true;
     err.textContent = '';
     try {
-      const r = await api('feedback', { id: myId, targetId: target.id, text: pendingFeedback });
+      const r = await api('feedback', { id: myId, text: pendingFeedback });
       if (!r.ok) { err.textContent = r.error; return; }
       go('done');
     } catch (e) {
