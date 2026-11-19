@@ -10,7 +10,7 @@
   * { box-sizing: border-box; }
   body { margin:0; font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif; background:var(--yellow); color:var(--ink); min-height:100vh; }
   header { display:flex; justify-content:flex-end; align-items:center; padding:16px 24px; }
-  .logo { width:88px; height:auto; }
+  .logo { width:88px; height:auto; mix-blend-mode:multiply; }
   main { max-width:640px; margin:0 auto; padding:8px 20px 60px; }
   .screen { display:none; }
   .screen.active { display:block; animation:fade .4s ease; }
@@ -65,15 +65,7 @@
 <body>
 
 <header>
-  <!-- LFT logo：簡化線條版，正式上線前請換成官方 logo 檔 -->
-  <svg class="logo" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-label="Lead For Taiwan">
-    <g stroke="#202020" stroke-width="4" fill="none">
-      <path d="M8 14 H112 V112"/>
-      <path d="M112 14 L42 84"/>
-    </g>
-    <text x="8" y="92" font-family="Arial, sans-serif" font-weight="700" font-size="15" fill="#202020">LEAD</text>
-    <text x="8" y="110" font-family="Arial, sans-serif" font-weight="700" font-size="15" fill="#202020">FOR TAIWAN</text>
-  </svg>
+  <img class="logo" src="logo.webp" alt="Lead For Taiwan">
 </header>
 
 <main>
