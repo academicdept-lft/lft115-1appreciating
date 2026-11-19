@@ -76,19 +76,19 @@
       <span class="deco d1">🍁</span>
       <span class="deco d2">🎃</span>
       <span class="deco d3">🌾</span>
-      <h1>感恩節，來說說<br>最近的心情吧</h1>
-      <p>寫下一件最近煩惱的事、一件最近開心的事，<br>再用溫暖的文字回饋給另一位筆友。</p>
-      <button class="btn" onclick="go('form')">開始感恩節回顧！</button>
+      <h1>感恩節，<br>來說說最近的心情吧</h1>
+      <p>雖然沒有辦法實體和大家靠北與聊天，<br>但藉著感恩節，在線上寫下一件最近煩惱的事、一件最近開心的事，<br>再用溫暖的文字回饋給另一位 LFT 筆友吧！</p>
+      <button class="btn" onclick="startOrResume()">開始感恩節回顧！</button>
     </div>
   </section>
 
   <!-- 填寫頁 -->
   <section id="form" class="screen">
     <div class="card">
-      <h2>留下你的心情</h2>
-      <p class="sub">你的 Email 只用於寄送回饋信件。</p>
+      <h2>嗨，最近好嗎？</h2>
+      <p class="sub">您的 Email 只用於寄送回饋信件。</p>
       <label for="name">名字或暱稱</label>
-      <input id="name" maxlength="20" placeholder="例如：13、ㄆㄖ">
+      <input id="name" maxlength="20" placeholder="例如：ㄆㄖ、13">
       <label for="email">Email</label>
       <input id="email" type="email" placeholder="you@example.com">
       <label for="worry">最近煩惱的事</label>
@@ -113,6 +113,7 @@
         <button class="btn" onclick="checkAssignment()">重新查看</button>
       </div>
     </div>
+    <div style="text-align:center"><button class="nav-link" onclick="startOver()">不是你？以新的筆友身分填寫</button></div>
   </section>
 
   <!-- 前三人：暫時不能回饋 -->
@@ -122,6 +123,7 @@
       <h2>謝謝你的分享！</h2>
       <p>你是最早加入的筆友之一，等其他筆友回饋你之後，<br>我們會寄一封回饋信給你，信裡會附上專屬連結，<br>邀請你回來回饋另一位筆友喔！</p>
     </div>
+    <div style="text-align:center"><button class="nav-link" onclick="startOver()">不是你？以新的筆友身分填寫</button></div>
   </section>
 
   <!-- 已經回饋過 -->
@@ -131,6 +133,7 @@
       <h2>你已經完成回饋囉！</h2>
       <p>謝謝你的溫暖，當你的事件被回饋後也會收到一封回饋信件喔！</p>
     </div>
+    <div style="text-align:center"><button class="nav-link" onclick="startOver()">不是你？以新的筆友身分填寫</button></div>
   </section>
 
   <!-- 回饋頁 -->
@@ -280,6 +283,23 @@
     else if (r.status === 'done') go('already');
     else if (r.status === 'review') showReview(r.assignment);
     else go('waiting');
+  }
+
+  // 這台瀏覽器之前填過，就接續原本的紀錄，避免重複填寫
+  function startOrResume() {
+    if (myId) checkAssignment();
+    else go('form');
+  }
+
+  // 同一台電腦換人填寫時使用
+  function startOver() {
+    myId = '';
+    try {
+      localStorage.removeItem('lft_my_id');
+      localStorage.removeItem('lft_my_name');
+    } catch (e) {}
+    ['name', 'email', 'worry', 'happy'].forEach(id => document.getElementById(id).value = '');
+    go('form');
   }
 
   // 從信件中的專屬連結（?id=...）回來時，直接帶回自己的紀錄
