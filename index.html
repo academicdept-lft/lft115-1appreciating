@@ -59,6 +59,8 @@
   .mail-body .quote { background:var(--cream); border-left:5px solid var(--yellow); padding:14px 16px; border-radius:8px; margin:14px 0; white-space:pre-wrap; }
   .mail-body .small { font-size:14px; color:#555; }
   .mail-foot { background:var(--cream); padding:14px 24px; font-size:13px; color:#555; text-align:center; }
+  .more-box { margin-top:22px; padding-top:20px; border-top:1px dashed #d8d4cf; }
+  .more-q { font-weight:700; margin:0 0 12px; }
   .btn-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px; }
 </style>
 </head>
@@ -132,6 +134,11 @@
       <span style="font-size:48px">🦃</span>
       <h2>您已經完成回饋囉！</h2>
       <p>謝謝您的溫暖，當您的事件被回饋後，也會在您留下的信箱中收到一封回饋信件喔！</p>
+      <div class="more-box">
+        <p class="more-q">想再回饋一位筆友嗎？</p>
+        <button class="btn" onclick="requestMore(this)">再回饋一位筆友</button>
+        <div class="err more-err"></div>
+      </div>
     </div>
     <div style="text-align:center"><button class="nav-link" onclick="startOver()">不是您？以新的筆友身分填寫</button></div>
   </section>
@@ -192,6 +199,20 @@
       <span style="font-size:48px">🦃</span>
       <h2>謝謝您的回饋！</h2>
       <p>感謝您的回饋，回饋會以 Email 寄給作者、當您的事件被回饋後也會收到一封回饋信件喔！</p>
+      <div class="more-box">
+        <p class="more-q">想再回饋一位筆友嗎？</p>
+        <button class="btn" onclick="requestMore(this)">再回饋一位筆友</button>
+        <div class="err more-err"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 沒有可以加碼回饋的筆友 -->
+  <section id="nomore" class="screen">
+    <div class="card done">
+      <span style="font-size:48px">🍁</span>
+      <h2>謝謝您的溫暖！</h2>
+      <p>目前沒有可以再回饋的筆友了，<br>之後可以再回來看看喔！</p>
     </div>
   </section>
 
@@ -207,6 +228,7 @@
   try { myId = localStorage.getItem('lft_my_id') || ''; } catch (e) {}
   let target = null;
   let pendingFeedback = '';
+  let reviewMode = 'first';  // first：第一則回饋；more：加碼回饋
   let myName = '';
   try { myName = localStorage.getItem('lft_my_name') || ''; } catch (e) {}
 
@@ -296,7 +318,9 @@
     } catch (e) {}
     if (r.status === 'locked') go('locked');
     else if (r.status === 'done') go('already');
-    else if (r.status === 'review') showReview(r.assignment);
+    else if (r.status === 'review') showReview(r.assignment, 'first');
+    else if (r.status === 'more') showReview(r.assignment, 'more');
+    else if (r.status === 'nomore') go('nomore');
     else go('waiting');
   }
 
@@ -317,6 +341,23 @@
     go('form');
   }
 
+  // 完成回饋後，選擇再回饋一位筆友
+  async function requestMore(btn) {
+    const err = btn.parentElement.querySelector('.more-err');
+    err.textContent = '';
+    setBusy(btn, true);
+    btn.textContent = '配對中，請稍候…';
+    try {
+      const r = await api('more', { id: myId });
+      if (!r.ok) { err.textContent = r.error; return; }
+      handleStatus(r);
+    } catch (e) {
+      err.textContent = '連線不太順，請再按一次。';
+    } finally {
+      setBusy(btn, false);
+    }
+  }
+
   // 從信件中的專屬連結（?id=...）回來時，直接帶回自己的紀錄
   (function initFromLink() {
     const linkId = new URLSearchParams(location.search).get('id');
@@ -327,8 +368,9 @@
     }
   })();
 
-  function showReview(a) {
+  function showReview(a, mode) {
     target = a;
+    reviewMode = mode || 'first';
     document.getElementById('pWorry').textContent = a.worry;
     document.getElementById('pHappy').textContent = a.happy;
     document.getElementById('feedback').value = '';
@@ -367,7 +409,8 @@
     setBusy(btn, true);
     err.textContent = '';
     try {
-      const r = await api('feedback', { id: myId, text: pendingFeedback });
+      const action = reviewMode === 'more' ? 'moreFeedback' : 'feedback';
+      const r = await api(action, { id: myId, text: pendingFeedback });
       if (!r.ok) { err.textContent = r.error; return; }
       go('done');
     } catch (e) {
