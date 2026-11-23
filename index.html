@@ -207,6 +207,20 @@
   try { myId = localStorage.getItem('lft_my_id') || ''; } catch (e) {}
   let target = null;
   let pendingFeedback = '';
+  let myName = '';
+  try { myName = localStorage.getItem('lft_my_name') || ''; } catch (e) {}
+
+  // 送出期間按鈕顯示「送出中…」，讓大家知道正在處理
+  function setBusy(btn, busy) {
+    if (busy) {
+      btn.dataset.label = btn.textContent;
+      btn.textContent = '送出中，請稍候…';
+      btn.disabled = true;
+    } else {
+      btn.textContent = btn.dataset.label || btn.textContent;
+      btn.disabled = false;
+    }
+  }
 
   function go(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
@@ -249,15 +263,15 @@
     }
 
     err.textContent = '';
-    btn.disabled = true;
+    setBusy(btn, true);
     try {
       const r = await api('submit', data);
       if (!r.ok) { err.textContent = r.error; return; }
       handleStatus(r);
     } catch (e) {
-      err.textContent = '網路好像有點問題，請稍後再試。';
+      err.textContent = '連線不太順，請再按一次送出（不會重複留言）。';
     } finally {
-      btn.disabled = false;
+      setBusy(btn, false);
     }
   }
 
@@ -275,6 +289,7 @@
   // 依後端回傳的狀態切換畫面
   function handleStatus(r) {
     myId = r.id;
+    myName = r.me || myName;
     try {
       localStorage.setItem('lft_my_id', r.id);
       localStorage.setItem('lft_my_name', r.me);
@@ -339,7 +354,7 @@
     err.textContent = '';
     pendingFeedback = text;
     document.getElementById('pvQuote').textContent = text;
-    document.getElementById('pvName').textContent = localStorage.getItem('lft_my_name') || '筆友';
+    document.getElementById('pvName').textContent = myName || '筆友';
     document.getElementById('pvWorry').textContent = target.worry;
     document.getElementById('pvHappy').textContent = target.happy;
     document.getElementById('previewErr').textContent = '';
@@ -349,16 +364,16 @@
   async function sendFeedback() {
     const btn = document.getElementById('confirmBtn');
     const err = document.getElementById('previewErr');
-    btn.disabled = true;
+    setBusy(btn, true);
     err.textContent = '';
     try {
       const r = await api('feedback', { id: myId, text: pendingFeedback });
       if (!r.ok) { err.textContent = r.error; return; }
       go('done');
     } catch (e) {
-      err.textContent = '網路好像有點問題，請稍後再試。';
+      err.textContent = '連線不太順，請再按一次送出（不會重複寄出）。';
     } finally {
-      btn.disabled = false;
+      setBusy(btn, false);
     }
   }
 </script>
